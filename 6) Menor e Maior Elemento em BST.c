@@ -1,0 +1,196 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct no{
+    int valor;
+    struct no *esquerda;
+    struct no *direita;
+} No;
+
+No* criarNo(int valor){
+    No* novoNo = (No*)malloc(sizeof(No));
+    if (novoNo == NULL){
+        printf("Erro ao alocar memoria\n");
+        exit(1);
+    }
+    novoNo->valor = valor;
+    novoNo->esquerda = NULL;
+    novoNo->direita = NULL;
+    return novoNo;
+}
+
+No* inserir(No* raiz, int valor){
+    if (raiz == NULL){
+        return criarNo(valor);
+    }
+    if (valor < raiz->valor){
+        raiz->esquerda = inserir(raiz->esquerda, valor);
+    } else if (valor > raiz->valor){
+        raiz->direita = inserir(raiz->direita, valor);
+    }
+    return raiz;
+}
+
+void imprimirPreOrdem(No* raiz){
+    if (raiz != NULL){
+        printf("%d ", raiz->valor);
+        imprimirPreOrdem(raiz->esquerda);
+        imprimirPreOrdem(raiz->direita);
+    }
+}
+
+void imprimirEmOrdem(No* raiz){
+    if (raiz != NULL){
+        imprimirEmOrdem(raiz->esquerda);
+        printf("%d ", raiz->valor);
+        imprimirEmOrdem(raiz->direita);
+    }
+}
+
+void imprimirPosOrdem(No* raiz){
+    if (raiz != NULL){
+        imprimirPosOrdem(raiz->esquerda);
+        imprimirPosOrdem(raiz->direita);
+        printf("%d ", raiz->valor);
+    }
+}
+
+int alturaArvore(No* raiz){
+    if (raiz == NULL){
+        return 0;
+    }else{
+        int altura_esq = alturaArvore(raiz->esquerda);
+
+        int altura_dir = alturaArvore(raiz->direita);
+
+        if (altura_esq > altura_dir){
+            return (altura_esq + 1);
+        }else{
+            return (altura_dir + 1);
+        }
+    }
+}
+
+int contarNos(No* raiz){
+    if (raiz == NULL){
+        return 0;
+    }
+    return 1 + contarNos(raiz->esquerda) + contarNos(raiz->direita);
+}
+
+int contarFolhas(No* raiz){
+    if (raiz == NULL){
+        return 0;
+    }
+    if (raiz->esquerda == NULL && raiz->direita == NULL){
+        return 1;
+    }
+    return contarFolhas(raiz->esquerda) + contarFolhas(raiz->direita);
+}
+
+int buscar(No* raiz, int valor){
+    if(raiz == NULL){
+        return 0;
+    }
+    if(valor == raiz->valor){
+        return 1;
+    }
+    if(valor < raiz->valor){
+        return buscar(raiz->esquerda, valor);
+    }else{
+        return buscar(raiz->direita, valor);
+    }
+}
+
+int menorValor(No* raiz){
+    if (raiz == NULL){
+        printf("Erro: Arvore vazia\n");
+        exit(1);
+    }
+    No* atual = raiz;
+    while (atual->esquerda != NULL){
+        atual = atual->esquerda;
+    }
+    return atual->valor;
+}
+
+int maiorValor(No* raiz){
+    if (raiz == NULL){
+        printf("Erro: Arvore vazia\n");
+        exit(1);
+    }
+    No* atual = raiz;
+    while (atual->direita != NULL){
+        atual = atual->direita;
+    }
+    return atual->valor;
+}
+
+int main() {
+    No *raiz = NULL;
+    int valor;
+
+    printf("--- Construtor de Arvore Binaria e Percursos ---\n");
+    printf("(Para finalizar, digite um numero negativo)\n");
+    while(1){
+        printf("Digite um valor: ");
+        if(scanf("%d", &valor) != 1){
+            printf("Entrada invalida, digite um numero\n");
+            while(getchar() != '\n');
+            continue;
+        }
+        if(valor < 0){
+            break;
+        }
+        raiz = inserir(raiz, valor);
+    }
+
+    printf("\n--- Resultados dos Percursos ---\n");
+    if(raiz == NULL){
+        printf("A arvore esta vazia\n");
+    }else{
+        printf("Percurso Pre-Ordem(Root, Left, Right): ");
+        imprimirPreOrdem(raiz);
+        printf("\n");
+
+        printf("Percurso In-Ordem(Left, Root, Right): ");
+        imprimirEmOrdem(raiz);
+        printf("\n");
+
+        printf("Percurso Pos-Ordem (Left, Right, Root): ");
+        imprimirPosOrdem(raiz);
+        printf("\n");
+
+        printf("\n--- Altura da arvore ---\n");
+        int h = alturaArvore(raiz);
+        printf("Altura da arvore: %d\n", h);
+
+        printf("\n--- Contagem de Nos e Folhas ---\n");
+        printf("Total de nos: %d\n", contarNos(raiz));
+        printf("Total de folhas: %d\n", contarFolhas(raiz));
+
+        printf("\n--- Menor e Maior Valor ---\n");
+        printf("Menor valor: %d\n", menorValor(raiz));
+        printf("Maior valor: %d\n", maiorValor(raiz));
+
+        printf("\n--- Busca de Valores ---\n");
+        printf("Digite valores para buscar (numero negativo para parar)\n");
+        while(1) {
+            printf("Digite um valor para buscar: ");
+            if(scanf("%d", &valor) != 1){
+                printf("Entrada invalida\n");
+                while (getchar() != '\n');
+                continue;
+            }
+            if(valor < 0){
+                break;
+            }
+            if(buscar(raiz, valor)){
+                printf("Valor %d encontrado na arvore\n", valor);
+            }else{
+                printf("Valor %d nao encontrado na arvore\n", valor);
+            }
+        }
+    }
+    return 0;
+}
